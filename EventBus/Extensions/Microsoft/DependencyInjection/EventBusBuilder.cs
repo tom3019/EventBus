@@ -1,3 +1,4 @@
+using EventBus.Subscriptions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EventBus.Extensions.Microsoft.DependencyInjection;
@@ -12,6 +13,9 @@ public class EventBusBuilder:IEventBusBuilder
     /// </summary>
     public IServiceCollection ServiceCollection { get; set; }
 
+    public ISubscriptionCollection SubscriptionCollection { get; set; }
+
+
     /// <summary>
     /// EventBusBuilder
     /// </summary>
@@ -19,5 +23,6 @@ public class EventBusBuilder:IEventBusBuilder
     public EventBusBuilder(IServiceCollection serviceCollection)
     {
         ServiceCollection = serviceCollection;
+        SubscriptionCollection = serviceCollection.BuildServiceProvider().GetRequiredService<ISubscriptionCollection>();
     }
 }

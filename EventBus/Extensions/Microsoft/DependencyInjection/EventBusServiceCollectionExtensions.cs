@@ -17,10 +17,11 @@ public static class EventBusServiceCollectionExtensions
     /// <returns></returns>
     public static IServiceCollection AddEventBus(this IServiceCollection serviceCollection, Action<IEventBusBuilder> setup)
     {
+        serviceCollection.AddScoped<ISubscriptionCollection, SubscriptionCollection>();
+        serviceCollection.AddScoped<ISubscriptionProvider, SubscriptionProvider>();
+        
         var eventBusBuilder = new EventBusBuilder(serviceCollection);
         setup.Invoke(eventBusBuilder);
-        
-        eventBusBuilder.ServiceCollection.TryAddScoped<ISubscriptionCollection,SubscriptionCollection>();
         return serviceCollection;
     }
 }
