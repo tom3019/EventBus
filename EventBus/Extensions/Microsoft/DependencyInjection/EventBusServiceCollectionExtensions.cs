@@ -20,7 +20,7 @@ public static class EventBusServiceCollectionExtensions
         var eventBusBuilder = new EventBusBuilder(serviceCollection);
         setup.Invoke(eventBusBuilder);
         
-        eventBusBuilder.Service.TryAddScoped<ISubscriptionCollection,SubscriptionCollection>();
+        eventBusBuilder.ServiceCollection.TryAddScoped<ISubscriptionCollection,SubscriptionCollection>();
         return serviceCollection;
     }
 }

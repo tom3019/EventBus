@@ -41,7 +41,7 @@ public static class EventBusBuilderExtensions
         {
             foreach (var interfaceType in descriptor.InterfaceTypes)
             {
-                eventBusBuilder.Service.TryAdd(
+                eventBusBuilder.ServiceCollection.TryAdd(
                     new ServiceDescriptor(
                         interfaceType,
                         descriptor.HandlerType,

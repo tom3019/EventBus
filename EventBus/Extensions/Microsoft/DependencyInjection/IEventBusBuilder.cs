@@ -2,10 +2,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EventBus.Extensions.Microsoft.DependencyInjection;
 
+/// <summary>
+/// event bus builder interface
+/// </summary>
 public interface IEventBusBuilder
 {
     /// <summary>
     /// Service collection
     /// </summary>
-    public IServiceCollection Service { get; set; }
+    public IServiceCollection ServiceCollection { get; set; }
 }
