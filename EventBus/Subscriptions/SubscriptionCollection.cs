@@ -7,7 +7,7 @@ namespace EventBus.Subscriptions;
 /// <summary>
 /// Subscription Collection
 /// </summary>
-public class SubscriptionCollection : ISubscriptionCollection
+internal class SubscriptionCollection : ISubscriptionCollection
 {
     /// <summary>
     /// Subscription Descriptor List
