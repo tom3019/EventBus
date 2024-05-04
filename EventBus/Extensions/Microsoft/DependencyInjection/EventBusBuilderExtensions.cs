@@ -10,12 +10,12 @@ namespace EventBus.Extensions.Microsoft.DependencyInjection;
 public static class EventBusBuilderExtensions
 {
     /// <summary>
-    /// add event handlers from assemblies
+    /// add event handlers from assembly
     /// </summary>
     /// <param name="eventBusBuilder"></param>
     /// <param name="eventHandlerServiceLifetime"></param>
     /// <returns></returns>
-    public static IEventBusBuilder AddEventHandlersFromAssemblies(this IEventBusBuilder eventBusBuilder,
+    public static IEventBusBuilder AddEventHandlersFromAssembly(this IEventBusBuilder eventBusBuilder,
         ServiceLifetime eventHandlerServiceLifetime = ServiceLifetime.Scoped)
     {
         var entryAssembly = Assembly.GetEntryAssembly();
@@ -27,26 +27,30 @@ public static class EventBusBuilderExtensions
         var eventHandlerDescriptors = entryAssembly.GetExportedTypes().Distinct()
             .Where(t => !t.IsAbstract)
             .Where(t => !t.IsGenericTypeDefinition)
-            .Where(t=> t.GetInterfaces()
+            .Where(t => t.GetInterfaces()
                 .Any(c => c.GetGenericTypeDefinition() == typeof(IEventHandler<>)))
-            .Select(handlerType =>new
+            .Select(handlerType => new
             {
-                InterfaceType = handlerType.GetInterfaces()
-                    .FirstOrDefault(c => c.GetGenericTypeDefinition() == typeof(IEventHandler<>)),
+                InterfaceTypes = handlerType.GetInterfaces()
+                    .Where(c => c.GetGenericTypeDefinition() == typeof(IEventHandler<>)),
                 HandlerType = handlerType
-            }).Where(x=>x.InterfaceType != null).ToList();
+            }).Where(w=>w.InterfaceTypes.Any())
+            .ToList();
 
         foreach (var descriptor in eventHandlerDescriptors)
         {
-            eventBusBuilder.Service.TryAdd(
-                new ServiceDescriptor(
-                    descriptor.InterfaceType!,
-                    descriptor.HandlerType,
-                    eventHandlerServiceLifetime
-                ));
+            foreach (var interfaceType in descriptor.InterfaceTypes)
+            {
+                eventBusBuilder.Service.TryAdd(
+                    new ServiceDescriptor(
+                        interfaceType,
+                        descriptor.HandlerType,
+                        eventHandlerServiceLifetime
+                    ));
+            }
         }
-
 
         return eventBusBuilder;
     }
+    
 }
