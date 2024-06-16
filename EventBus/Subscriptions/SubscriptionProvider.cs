@@ -12,7 +12,7 @@ internal class SubscriptionProvider : ISubscriptionProvider
     }
 
     /// <summary>
-    /// 取的事件處理程序
+    /// 取得事件處理程序
     /// </summary>
     /// <typeparam name="TEvent"></typeparam>
     /// <returns></returns>
@@ -21,4 +21,17 @@ internal class SubscriptionProvider : ISubscriptionProvider
         var eventHandlers = _serviceProvider.GetServices<IEventHandler<TEvent>>();
         return eventHandlers;
     }
+    
+    /// <summary>
+    /// 取得事件處理程序
+    /// </summary>
+    /// <param name="event"></param>
+    /// <returns></returns>
+    public IEnumerable<object> GetEventHandlers(object @event)
+    {
+        var eventHandlerType = typeof(IEventHandler<>).MakeGenericType(@event.GetType());
+        var eventHandlers = _serviceProvider.GetServices(eventHandlerType);
+        return eventHandlers;
+    }
+    
 }
