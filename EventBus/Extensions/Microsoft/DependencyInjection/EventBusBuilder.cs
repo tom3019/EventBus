@@ -13,7 +13,6 @@ public class EventBusBuilder:IEventBusBuilder
     /// </summary>
     public IServiceCollection ServiceCollection { get; set; }
 
-    public ISubscriptionCollection SubscriptionCollection { get; set; }
 
 
     /// <summary>
@@ -23,6 +22,5 @@ public class EventBusBuilder:IEventBusBuilder
     public EventBusBuilder(IServiceCollection serviceCollection)
     {
         ServiceCollection = serviceCollection;
-        SubscriptionCollection = serviceCollection.BuildServiceProvider().GetRequiredService<ISubscriptionCollection>();
     }
 }

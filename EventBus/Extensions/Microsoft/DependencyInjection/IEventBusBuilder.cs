@@ -12,10 +12,4 @@ public interface IEventBusBuilder
     /// Service collection
     /// </summary>
     public IServiceCollection ServiceCollection { get; }
-
-    /// <summary>
-    /// Subscription collection
-    /// </summary>
-    public ISubscriptionCollection SubscriptionCollection { get; }
-    
 }

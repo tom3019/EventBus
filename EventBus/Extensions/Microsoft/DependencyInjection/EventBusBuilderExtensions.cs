@@ -29,22 +29,33 @@ public static class EventBusBuilderExtensions
             .Where(t => !t.IsAbstract)
             .Where(t => !t.IsGenericTypeDefinition)
             .Where(t => t.GetInterfaces()
-                .Any(c => c.GetGenericTypeDefinition() == typeof(IEventHandler<>)))
+                .Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEventHandler<>)))
             .Select(handlerType =>
             {
-                var interfaceTypes =handlerType.GetInterfaces()
+                var interfaces = handlerType.GetInterfaces()
                     .Where(c => c.GetGenericTypeDefinition() == typeof(IEventHandler<>));
+                
                 return new
                 {
-                    InterfaceTypes =interfaceTypes,
-                    EventType = interfaceTypes.FirstOrDefault()?.GetGenericArguments().FirstOrDefault(),
+                    InterfaceTypes = interfaces,
+                    EventType = interfaces.FirstOrDefault().GetGenericArguments().FirstOrDefault(),
                     HandlerType = handlerType
                 };
-            })
-            .Where(w=>w.InterfaceTypes.Any())
-            .Where(w=>w.EventType is not null)
+            }).Where(w=>w.InterfaceTypes.Any())
             .ToList();
 
+        eventBusBuilder.ServiceCollection.TryAddSingleton<ISubscriptionCollection>(provider =>
+        {
+            var subscriptionCollection = new SubscriptionCollection();
+            foreach (var descriptor in eventHandlerDescriptors)
+            {
+                subscriptionCollection.Add(
+                    new SubscriptionDescriptor(descriptor.EventType, descriptor.HandlerType));
+            }
+        
+            return subscriptionCollection;
+        });
+        
         foreach (var descriptor in eventHandlerDescriptors)
         {
             foreach (var interfaceType in descriptor.InterfaceTypes)
@@ -55,13 +66,11 @@ public static class EventBusBuilderExtensions
                         descriptor.HandlerType,
                         eventHandlerServiceLifetime
                     ));
-                
-                eventBusBuilder.SubscriptionCollection.Add(
-                    new SubscriptionDescriptor(descriptor.EventType,descriptor.HandlerType));
-                
             }
         }
-
+        
+        eventBusBuilder.ServiceCollection.AddScoped<ISubscriptionProvider, SubscriptionProvider>();
+        
         return eventBusBuilder;
     }
     

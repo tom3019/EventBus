@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBus", "EventBus\EventBus.csproj", "{8D26D6FE-2B10-4537-B1D0-957A79BC3AEB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBus.Sample", "EventBus.Sample\EventBus.Sample.csproj", "{5C09921D-CC9D-40A9-B4AB-9ED9BFB80960}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{8D26D6FE-2B10-4537-B1D0-957A79BC3AEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D26D6FE-2B10-4537-B1D0-957A79BC3AEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D26D6FE-2B10-4537-B1D0-957A79BC3AEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C09921D-CC9D-40A9-B4AB-9ED9BFB80960}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C09921D-CC9D-40A9-B4AB-9ED9BFB80960}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C09921D-CC9D-40A9-B4AB-9ED9BFB80960}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C09921D-CC9D-40A9-B4AB-9ED9BFB80960}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
