@@ -1,6 +1,5 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Threading.Channels;
 using EventBus.InMemory.Background;
 using EventBus.Subscriptions;
 using Microsoft.Extensions.Logging;
@@ -21,8 +20,16 @@ internal class InMemoryEventBus : IEventBus
         _logger = logger;
     }
 
+    /// <summary>
+    /// 發佈事件
+    /// </summary>
+    /// <param name="event">事件</param>
+    /// <param name="cancellationToken">cancellationToken</param>
+    /// <typeparam name="TEvent">Event Type </typeparam>
+    /// <returns></returns>
     public async Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default) where TEvent : class
     {
+
         var eventType = @event.GetType();
         var eventNames = eventType.Name;
         _logger.LogTrace("publishing event ({Name})...", @event.GetType().Name);
@@ -48,6 +55,11 @@ internal class InMemoryEventBus : IEventBus
         _logger.LogTrace("Published event");
     }
 
+    /// <summary>
+    /// 訂閱事件
+    /// </summary>
+    /// <typeparam name="TEvent">Event Type</typeparam>
+    /// <typeparam name="TEventHandler">Event Handler Type</typeparam>
     public void Subscribe<TEvent, TEventHandler>() where TEvent : class where TEventHandler : IEventHandler<TEvent>
     {
         var eventName = typeof(TEvent).Name;
@@ -57,6 +69,11 @@ internal class InMemoryEventBus : IEventBus
         _logger.LogInformation("Subscribed to event {EventName} with {EventHandlerName}...", eventName, eventHandlerName);
     }
 
+    /// <summary>
+    /// 取消訂閱事件
+    /// </summary>
+    /// <typeparam name="TEvent">Event Type</typeparam>
+    /// <typeparam name="TEventHandler">Event Handler Type</typeparam>
     public void Unsubscribe<TEvent, TEventHandler>() where TEvent : class where TEventHandler : IEventHandler<TEvent>
     {
         var eventName = typeof(TEvent).Name;
