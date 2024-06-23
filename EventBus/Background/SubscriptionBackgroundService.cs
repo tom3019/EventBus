@@ -1,7 +1,7 @@
 ﻿using EventBus.Subscriptions;
 using Microsoft.Extensions.Hosting;
 
-namespace EventBus.RabbitMq.BackgroundServices;
+namespace EventBus.Background;
 
 internal class SubscriptionBackgroundService : BackgroundService
 {

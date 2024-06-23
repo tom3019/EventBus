@@ -1,5 +1,5 @@
-﻿using EventBus.Extensions.Microsoft.DependencyInjection;
-using EventBus.RabbitMq.BackgroundServices;
+﻿using EventBus.Background;
+using EventBus.Extensions.Microsoft.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -39,7 +39,6 @@ public static class ServiceCollectionExtensions
     private static IEventBusBuilder AddRabbitMqEventBus(this IEventBusBuilder eventBusBuilder)
     {
         eventBusBuilder.ServiceCollection.TryAddSingleton<IEventBus,EasyNetQEventBus>();
-        eventBusBuilder.ServiceCollection.AddHostedService<SubscriptionBackgroundService>();
         return eventBusBuilder;
     }
 }
