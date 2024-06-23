@@ -8,6 +8,8 @@ using EasyNetQ.Topology;
 using EventBus.RabbitMq.Attributes;
 using EventBus.RabbitMq.Extensions;
 using EventBus.Subscriptions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace EventBus.RabbitMq;
@@ -17,15 +19,15 @@ public class EasyNetQEventBus : IEventBus
     private readonly IBus _bus;
     private readonly RabbitMqOption _rabbitMqOption;
     private readonly ISubscriptionCollection _subscriptionCollection;
-    private readonly IEventHandlerInvoker _eventHandlerInvoker;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public EasyNetQEventBus(RabbitMqOption rabbitMqOption,
-        ISubscriptionCollection subscriptionCollection,
-        IEventHandlerInvoker eventHandlerInvoker)
+    public EasyNetQEventBus(IOptions<RabbitMqOption> options ,
+        ISubscriptionCollection subscriptionCollection, 
+        IServiceScopeFactory serviceScopeFactory)
     {
-        _rabbitMqOption = rabbitMqOption;
+        _rabbitMqOption = options.Value;
         _subscriptionCollection = subscriptionCollection;
-        _eventHandlerInvoker = eventHandlerInvoker;
+        _serviceScopeFactory = serviceScopeFactory;
         _bus = ConfigEventBus();
     }
 
@@ -172,6 +174,11 @@ public class EasyNetQEventBus : IEventBus
         MessageReceivedInfo messageReceivedInfo)
     {
 
+        using var serviceScope = _serviceScopeFactory.CreateScope();
+
+        var serviceProvider = serviceScope.ServiceProvider;
+        var eventHandlerInvoker = serviceProvider.GetRequiredService<IEventHandlerInvoker>();
+        
         var internalEventContent = Encoding.UTF8.GetString(readOnlyMemory.Span);
         var internalEvent = JsonSerializer.Deserialize<InternalEvent>(internalEventContent);
 
@@ -184,7 +191,7 @@ public class EasyNetQEventBus : IEventBus
                 .UnsafeRelaxedJsonEscaping
         };
         var @event = JsonSerializer.Deserialize(internalEvent.EventContent, eventType, serializerOptions);
-        await _eventHandlerInvoker.InvokeAsync(@event);
+        await eventHandlerInvoker.InvokeAsync(@event);
     }
 
     /// <summary>
