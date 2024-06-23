@@ -7,6 +7,7 @@ using EasyNetQ.DI;
 using EasyNetQ.Topology;
 using EventBus.RabbitMq.Attributes;
 using EventBus.RabbitMq.Extensions;
+using EventBus.Subscriptions;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace EventBus.RabbitMq;
@@ -15,17 +16,23 @@ public class EasyNetQEventBus : IEventBus
 {
     private readonly IBus _bus;
     private readonly RabbitMqOption _rabbitMqOption;
+    private readonly ISubscriptionCollection _subscriptionCollection;
+    private readonly IEventHandlerInvoker _eventHandlerInvoker;
 
-    public EasyNetQEventBus(RabbitMqOption rabbitMqOption)
+    public EasyNetQEventBus(RabbitMqOption rabbitMqOption,
+        ISubscriptionCollection subscriptionCollection,
+        IEventHandlerInvoker eventHandlerInvoker)
     {
         _rabbitMqOption = rabbitMqOption;
+        _subscriptionCollection = subscriptionCollection;
+        _eventHandlerInvoker = eventHandlerInvoker;
         _bus = ConfigEventBus();
     }
-    
+
     private IBus ConfigEventBus()
     {
         var connectionConfiguration = this._rabbitMqOption.ToConnectionConfiguration();
-            
+
         return RabbitHutch.CreateBus
         (
             connectionConfiguration,
@@ -34,7 +41,6 @@ public class EasyNetQEventBus : IEventBus
                 c => new Conventions(c.Resolve<ITypeNameSerializer>())
             )
         );
-            
     }
 
     /// <summary>
@@ -44,23 +50,24 @@ public class EasyNetQEventBus : IEventBus
     /// <param name="cancellationToken">cancellationToken</param>
     /// <typeparam name="TEvent">Event Type </typeparam>
     /// <returns></returns>
-    public async Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default) where TEvent : class
+    public async Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
+        where TEvent : class
     {
         if (@event is null)
         {
             throw new ArgumentNullException(nameof(@event));
         }
-        
+
         var eventType = @event.GetType();
         var eventNames = eventType.Name;
-        
+
         var serializerOptions = new JsonSerializerOptions
         {
             Encoder = JavaScriptEncoder
                 .UnsafeRelaxedJsonEscaping
         };
         var eventContent = JsonSerializer.Serialize(@event, eventType, serializerOptions);
-        
+
         cancellationToken.ThrowIfCancellationRequested();
         var internalEvent = new InternalEvent
         {
@@ -74,25 +81,146 @@ public class EasyNetQEventBus : IEventBus
         var exchange = GetOrDeclareExchange<TEvent>(_bus.Advanced);
         var eventAttribute = typeof(TEvent).GetCustomAttribute<EventAttribute>();
         var priority = eventAttribute?.Priority ?? 0;
-        var routingKey = eventAttribute != null ? eventAttribute.RoutingKey : internalEvent.EventTypeName;
 
         using var advancedBus = _bus.Advanced;
-        
+
         await advancedBus.PublishAsync
         (
             exchange,
-            routingKey,
+            internalEvent.EventTypeName,
             true,
             new MessageProperties
             {
                 DeliveryMode = (byte)DeliveryMode.Persistent,
                 Priority = priority
             },
-            Encoding.UTF8.GetBytes(internalEventContent), 
+            Encoding.UTF8.GetBytes(internalEventContent),
             cancellationToken
         );
     }
-    
+
+
+    /// <summary>
+    /// 訂閱事件
+    /// </summary>
+    /// <typeparam name="TEvent">Event Type</typeparam>
+    /// <typeparam name="TEventHandler">Event Handler Type</typeparam>
+    public void Subscribe<TEvent, TEventHandler>() where TEvent : class where TEventHandler : IEventHandler<TEvent>
+    {
+        var containsKey =
+            _subscriptionCollection.Contains(new SubscriptionDescriptor(typeof(TEvent), typeof(TEventHandler)));
+        if (containsKey)
+        {
+            return;
+        }
+
+        using var advancedBus = _bus.Advanced;
+
+        var exchange = GetOrDeclareExchange<TEvent>(advancedBus);
+        var queue = GetOrDeclareQueue<TEvent>(advancedBus);
+        var eventName = typeof(TEvent).Name;
+        advancedBus.Bind(exchange, queue, eventName);
+
+        advancedBus.Consume
+        (
+            queue,
+            Consumer_Received,
+            config =>
+            {
+                if (this._rabbitMqOption.ConsumePrefetchCount.Equals(default).Equals(false))
+                {
+                    config.WithPrefetchCount(this._rabbitMqOption.ConsumePrefetchCount);
+                }
+            }
+        );
+
+        _subscriptionCollection.Add<TEvent, TEventHandler>();
+    }
+
+    /// <summary>
+    /// 取消訂閱事件
+    /// </summary>
+    /// <typeparam name="TEvent">Event Type</typeparam>
+    /// <typeparam name="TEventHandler">Event Handler Type</typeparam>
+    public void Unsubscribe<TEvent, TEventHandler>() where TEvent : class where TEventHandler : IEventHandler<TEvent>
+    {
+        using var advancedBus = _bus.Advanced;
+
+        var eventName = typeof(TEvent).Name;
+        advancedBus.QueueUnbindAsync
+            (
+                _rabbitMqOption.QueueName,
+                _rabbitMqOption.ExchangeName,
+                eventName,
+                new Dictionary<string, object>()
+            )
+            .ConfigureAwait(false)
+            .GetAwaiter()
+            .GetResult();
+
+        _subscriptionCollection.Remove(new SubscriptionDescriptor(typeof(TEvent), typeof(TEventHandler)));
+        
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="readOnlyMemory"></param>
+    /// <param name="messageProperties"></param>
+    /// <param name="messageReceivedInfo"></param>
+    private async Task Consumer_Received(ReadOnlyMemory<byte> readOnlyMemory, MessageProperties messageProperties,
+        MessageReceivedInfo messageReceivedInfo)
+    {
+
+        var internalEventContent = Encoding.UTF8.GetString(readOnlyMemory.Span);
+        var internalEvent = JsonSerializer.Deserialize<InternalEvent>(internalEventContent);
+
+        var eventType = _subscriptionCollection
+            .FirstOrDefault(x => x.EventType.Name == internalEvent.EventTypeName)!.EventType;
+
+        var serializerOptions = new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder
+                .UnsafeRelaxedJsonEscaping
+        };
+        var @event = JsonSerializer.Deserialize(internalEvent.EventContent, eventType, serializerOptions);
+        await _eventHandlerInvoker.InvokeAsync(@event);
+    }
+
+    /// <summary>
+    ///     Gets or declares the queue for an event.
+    /// </summary>
+    /// <typeparam name="TEvent">The type of the event.</typeparam>
+    /// <returns>The queue for the event.</returns>
+    private Queue GetOrDeclareQueue<TEvent>(IAdvancedBus advancedBus) where TEvent : class
+    {
+        var queueAttribute = typeof(TEvent).GetCustomAttribute<Attributes.QueueAttribute>();
+
+        var queueName = queueAttribute != null ? queueAttribute.QueueName : _rabbitMqOption.QueueName;
+
+        var durable = queueAttribute != null ? queueAttribute.Durable : _rabbitMqOption.Durable;
+
+        var exclusive = queueAttribute != null ? queueAttribute.Exclusive : false;
+
+        var autoDelete = queueAttribute != null ? queueAttribute.AutoDelete : _rabbitMqOption.AutoDelete;
+
+        return advancedBus.QueueDeclare
+        (
+            queueName,
+            configure =>
+            {
+                configure.AsDurable(durable)
+                    .AsExclusive(exclusive)
+                    .AsAutoDelete(autoDelete);
+
+                if (this._rabbitMqOption.MaxPriority.Equals(0).Equals(false))
+                {
+                    configure.WithArgument("x-max-priority", this._rabbitMqOption.MaxPriority);
+                }
+            }
+        );
+    }
+
     /// <summary>
     /// Gets the or declare exchange using the specified advanced bus
     /// </summary>
@@ -116,15 +244,5 @@ public class EasyNetQEventBus : IEventBus
             _rabbitMqOption.Durable,
             _rabbitMqOption.AutoDelete
         );
-    }
-
-    public void Subscribe<TEvent, TEventHandler>() where TEvent : class where TEventHandler : IEventHandler<TEvent>
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Unsubscribe<TEvent, TEventHandler>() where TEvent : class where TEventHandler : IEventHandler<TEvent>
-    {
-        throw new NotImplementedException();
     }
 }
