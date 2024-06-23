@@ -35,7 +35,12 @@ internal class SubscriberBackgroundService: BackgroundService
             var internalEvent = await _backgroundQueue.DequeueAsync(stoppingToken);
 
             var eventType = subscriptionCollection
-                .FirstOrDefault(x => x.EventType.Name == internalEvent.EventTypeName)!.EventType;
+                .FirstOrDefault(x => x.EventType.Name == internalEvent.EventTypeName)?.EventType;
+
+            if (eventType is null)
+            {
+                return;
+            }
             
             var serializerOptions = new JsonSerializerOptions
             {

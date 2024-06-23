@@ -34,12 +34,12 @@ internal class SubscriptionBackgroundService : BackgroundService
     /// <param name="stoppingToken"></param>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        foreach (var subscriptionDescriptor in _subscriptionCollection.ToList())
-        {
-            typeof(IEventBus).GetMethod(nameof(IEventBus.Subscribe))!
-                .MakeGenericMethod(subscriptionDescriptor.EventType, subscriptionDescriptor.HandlerType)
-                .Invoke(_eventBus, parameters: null);
-        }
+        // foreach (var subscriptionDescriptor in _subscriptionCollection.ToList())
+        // {
+        //     typeof(IEventBus).GetMethod(nameof(IEventBus.Subscribe))!
+        //         .MakeGenericMethod(subscriptionDescriptor.EventType, subscriptionDescriptor.HandlerType)
+        //         .Invoke(_eventBus, parameters: null);
+        // }
 
         await Task.CompletedTask;
     }
