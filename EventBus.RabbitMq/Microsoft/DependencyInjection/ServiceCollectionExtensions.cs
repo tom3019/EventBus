@@ -8,6 +8,11 @@ namespace EventBus.RabbitMq.Microsoft.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// 使用 RabbitMq
+    /// </summary>
+    /// <param name="eventBusBuilder"></param>
+    /// <returns></returns>
     public static IEventBusBuilder UseRabbitMq(this IEventBusBuilder eventBusBuilder)
     {
         eventBusBuilder.ServiceCollection.AddOptions<RabbitMqOption>()
@@ -17,6 +22,13 @@ public static class ServiceCollectionExtensions
         return eventBusBuilder;
     }
     
+    /// <summary>
+    /// 使用 RabbitMq
+    /// </summary>
+    /// <param name="eventBusBuilder"></param>
+    /// <param name="setUp"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
     public static IEventBusBuilder UseRabbitMq(this IEventBusBuilder eventBusBuilder, 
         Action<RabbitMqOption> setUp)
     {

@@ -35,6 +35,10 @@ public class EasyNetQEventBus : IEventBus
         _bus = ConfigEventBus();
     }
 
+    /// <summary>
+    /// 設定EasyNetQ EventBus
+    /// </summary>
+    /// <returns></returns>
     private IBus ConfigEventBus()
     {
         var connectionConfiguration = this._rabbitMqOption.ToConnectionConfiguration();
@@ -179,7 +183,7 @@ public class EasyNetQEventBus : IEventBus
     }
 
     /// <summary>
-    /// 
+    /// 訂閱事件接收
     /// </summary>
     /// <param name="readOnlyMemory"></param>
     /// <param name="messageProperties"></param>
@@ -209,7 +213,7 @@ public class EasyNetQEventBus : IEventBus
     }
 
     /// <summary>
-    ///     Gets or declares the queue for an event.
+    /// 取得或宣告Queue
     /// </summary>
     /// <typeparam name="TEvent">The type of the event.</typeparam>
     /// <returns>The queue for the event.</returns>
@@ -243,7 +247,7 @@ public class EasyNetQEventBus : IEventBus
     }
 
     /// <summary>
-    /// Gets the or declare exchange using the specified advanced bus
+    /// 取得Exchange
     /// </summary>
     /// <typeparam name="TEvent">The event</typeparam>
     /// <param name="advancedBus">The advanced bus</param>
