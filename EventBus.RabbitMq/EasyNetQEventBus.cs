@@ -9,6 +9,7 @@ using EventBus.RabbitMq.Attributes;
 using EventBus.RabbitMq.Extensions;
 using EventBus.Subscriptions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -20,14 +21,17 @@ public class EasyNetQEventBus : IEventBus
     private readonly RabbitMqOption _rabbitMqOption;
     private readonly ISubscriptionCollection _subscriptionCollection;
     private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly ILogger<EasyNetQEventBus> _logger;
 
     public EasyNetQEventBus(IOptions<RabbitMqOption> options ,
         ISubscriptionCollection subscriptionCollection, 
-        IServiceScopeFactory serviceScopeFactory)
+        IServiceScopeFactory serviceScopeFactory, 
+        ILogger<EasyNetQEventBus> logger)
     {
         _rabbitMqOption = options.Value;
         _subscriptionCollection = subscriptionCollection;
         _serviceScopeFactory = serviceScopeFactory;
+        _logger = logger;
         _bus = ConfigEventBus();
     }
 
@@ -62,7 +66,8 @@ public class EasyNetQEventBus : IEventBus
 
         var eventType = @event.GetType();
         var eventNames = eventType.Name;
-
+        _logger.LogTrace("publishing event ({Name})...", @event.GetType().Name);
+        
         var serializerOptions = new JsonSerializerOptions
         {
             Encoder = JavaScriptEncoder
@@ -70,6 +75,7 @@ public class EasyNetQEventBus : IEventBus
         };
         var eventContent = JsonSerializer.Serialize(@event, eventType, serializerOptions);
 
+        _logger.LogInformation("publish event message is ({EventContent})...", eventContent);
         cancellationToken.ThrowIfCancellationRequested();
         var internalEvent = new InternalEvent
         {
@@ -99,6 +105,8 @@ public class EasyNetQEventBus : IEventBus
             Encoding.UTF8.GetBytes(internalEventContent),
             cancellationToken
         );
+        
+        _logger.LogTrace("Published event");
     }
 
 
@@ -116,13 +124,16 @@ public class EasyNetQEventBus : IEventBus
             return;
         }
 
+        var eventName = typeof(TEvent).Name;
+        var eventHandlerName = typeof(TEventHandler).Name;
+        _logger.LogInformation("Subscribing to event {EventName} with {EventHandlerName}...", eventName, eventHandlerName);
+       
         using var advancedBus = _bus.Advanced;
-
+        
         var exchange = GetOrDeclareExchange<TEvent>(advancedBus);
         var queue = GetOrDeclareQueue<TEvent>(advancedBus);
-        var eventName = typeof(TEvent).Name;
+        
         advancedBus.Bind(exchange, queue, eventName);
-
         advancedBus.Consume
         (
             queue,
@@ -137,6 +148,7 @@ public class EasyNetQEventBus : IEventBus
         );
 
         _subscriptionCollection.Add<TEvent, TEventHandler>();
+        _logger.LogInformation("Subscribed to event {EventName} with {EventHandlerName}...", eventName, eventHandlerName);
     }
 
     /// <summary>
@@ -149,6 +161,8 @@ public class EasyNetQEventBus : IEventBus
         using var advancedBus = _bus.Advanced;
 
         var eventName = typeof(TEvent).Name;
+        var eventHandlerName = typeof(TEventHandler).Name;
+        _logger.LogInformation("Unsubscribing {EventHandler} from event {EventName}...",eventHandlerName ,eventName);
         advancedBus.QueueUnbindAsync
             (
                 _rabbitMqOption.QueueName,
@@ -161,7 +175,7 @@ public class EasyNetQEventBus : IEventBus
             .GetResult();
 
         _subscriptionCollection.Remove(new SubscriptionDescriptor(typeof(TEvent), typeof(TEventHandler)));
-        
+        _logger.LogInformation("Unsubscribed {EventHandler} from event {EventName}", eventHandlerName ,eventName);
     }
 
     /// <summary>
