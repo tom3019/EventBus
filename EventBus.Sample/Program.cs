@@ -17,7 +17,7 @@ builder.Services.AddSwaggerGen();
 if (builder.Environment.IsDevelopment())
 {
     //builder.Services.AddScoped<IEventHandler<TestEvent>, TestEventHandler>();
-    builder.Services.AddEventBus(o => o.UseSubscriptions(s => 
+    builder.Services.AddEventBus(o => o.UseSubscriptions(s =>
         s.AddEventHandlersFromAssembly()).UseInMemory());
 }
 else
@@ -28,11 +28,9 @@ else
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
