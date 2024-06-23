@@ -1,6 +1,6 @@
 ﻿namespace EventBus.RabbitMq;
 
-internal class AmqpPoint
+internal class AmqpEndPoint
 {
     /// <summary>
     /// Gets the value of the host
@@ -13,11 +13,11 @@ internal class AmqpPoint
     public ushort Port { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AmqpPoint"/> class
+    /// Initializes a new instance of the <see cref="AmqpEndPoint"/> class
     /// </summary>
     /// <param name="host">The host</param>
     /// <param name="port">The port</param>
-    public AmqpPoint(string host,ushort port)
+    public AmqpEndPoint(string host,ushort port)
     {
         this.Host = host;
         this.Port = port;

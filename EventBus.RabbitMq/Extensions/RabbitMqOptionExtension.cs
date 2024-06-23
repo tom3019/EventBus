@@ -4,16 +4,16 @@ namespace EventBus.RabbitMq.Extensions;
 
 internal static class RabbitMqOptionExtension
 {
-    private static IEnumerable<AmqpPoint> GetConnectionStrings(this RabbitMqOption rabbitMqOption)
+    private static IEnumerable<AmqpEndPoint> GetConnectionStrings(this RabbitMqOption rabbitMqOption)
     {
         var endpoints = rabbitMqOption.ConnectionString.Split(separator: ',');
-        var amqpPoints = new List<AmqpPoint>();
+        var amqpPoints = new List<AmqpEndPoint>();
         foreach (var endpoint in endpoints)
         {
             var url = endpoint.Split(separator: ':');
             var hostName = url.ElementAt(0);
             var portParse = ushort.TryParse(url.ElementAt(1), out var port);
-            amqpPoints.Add(new AmqpPoint(hostName, portParse ? port : (ushort)5672));
+            amqpPoints.Add(new AmqpEndPoint(hostName, portParse ? port : (ushort)5672));
         }
 
         return amqpPoints;
