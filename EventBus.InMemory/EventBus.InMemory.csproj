@@ -4,6 +4,14 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>0.0.1-beta</Version>
+        <Title>EventBus-InMemory</Title>
+        <Authors>tom3019</Authors>
+        <Description>記憶體事件總線套件</Description>
+        <PackageTags>EventBus</PackageTags>
+        <PackageProjectUrl>https://github.com/tom3019/EventBus</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/tom3019/EventBus</RepositoryUrl>
     </PropertyGroup>
 
     <ItemGroup>
