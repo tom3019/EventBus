@@ -1,5 +1,4 @@
-﻿using EventBus.Background;
-using EventBus.Subscriptions;
+﻿using EventBus.Subscriptions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -21,7 +20,6 @@ public static class EventBusServiceCollectionExtensions
         var eventBusBuilder = new EventBusBuilder(serviceCollection);
         eventBusBuilder.ServiceCollection.AddScoped<ISubscriptionProvider, SubscriptionProvider>();
         eventBusBuilder.ServiceCollection.AddScoped<IEventHandlerInvoker, EventHandlerInvoker>();
-        eventBusBuilder.ServiceCollection.AddHostedService<SubscriptionBackgroundService>();
         setup.Invoke(eventBusBuilder);
         return serviceCollection;
     }

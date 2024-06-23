@@ -44,6 +44,11 @@ internal class SubscriptionCollection : ISubscriptionCollection
     public void Add(SubscriptionDescriptor item)
     {
         CheckReadOnly();
+
+        if (_descriptors.Contains(item))
+        {
+            return;
+        }
         _descriptors.Add(item);
     }
 
