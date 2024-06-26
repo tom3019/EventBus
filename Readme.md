@@ -25,13 +25,13 @@ Install-Package EventBus.RabbitMQ -Version 0.0.1-beta
 #### InMemory EventBus
 program.cs
 ```csharp
-builder.Services.AddEventBus(o => o.AddEventHandlersFromAssembly().UseInMemory());
+builder.Services.AddEventBus(o => o.UseInMemory());
 ```
 
 #### RabbitMQ EventBus
 program.cs
 ```csharp
-builder.Services.AddEventBus(o => o.AddEventHandlersFromAssembly().UseRabbitMQ());
+builder.Services.AddEventBus(o => o.UseRabbitMQ());
 ```
 appsettings.json
 ```json
@@ -52,7 +52,7 @@ appsettings.json
 ```
 ##### OR
 ```csharp
-builder.Services.AddEventBus(o => o.AddEventHandlersFromAssembly().UseRabbitMQ(o=>
+builder.Services.AddEventBus(o => o.UseRabbitMQ(o=>
 {
     //options
 }));
@@ -75,8 +75,12 @@ app.MapGet("/weatherforecast", async (IEventBus eventBus) =>
 ```
 
 ### Subscribe Event
+#### Dependency Injection
+```csharp
+builder.Services.AddEventBus(o => o.UseSubscriptions().UseInMemory());
+```
 #### Auto Register
-實現`IEventHandler<TEvent>`接口，並會在`AddEventHandlersFromAssembly`方法中自動註冊訂閱。
+實現`IEventHandler<TEvent>`接口
 ```csharp
 
 public class TestEventHandler : IEventHandler<TestEvent>
@@ -88,17 +92,25 @@ public class TestEventHandler : IEventHandler<TestEvent>
     }
 }
 ```
+使用`AddEventHandlersFromAssembly`方法來自動註冊訂閱。
+```csharp
+ builder.Services.AddEventBus(o => o.UseSubscriptions(s =>
+        s.AddEventHandlersFromAssembly()).UseInMemory());
+```
 
 #### Use `SubscribeAsync` Method
 ```csharp
 app.MapGet("/weatherforecast", async (IEventBus eventBus) =>
     {
-        await eventBus.SubscribeAsync<TestEvent>(async @event =>
-        {
-            Console.WriteLine(@event.Message);
-        });
+        eventBus.Subscribe<TestEvent, TestEventHandler>();
+
         Results.Ok();
     })
     .WithName("GetWeatherForecast")
     .WithOpenApi();
+```
+
+Dependency Injection
+```csharp
+builder.Services.AddScoped<IEventHandler<TestEvent>, TestEventHandler>();
 ```
