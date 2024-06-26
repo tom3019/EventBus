@@ -79,7 +79,6 @@ app.MapGet("/weatherforecast", async (IEventBus eventBus) =>
 ```csharp
 builder.Services.AddEventBus(o => o.UseSubscriptions().UseInMemory());
 ```
-#### Auto Register
 實現`IEventHandler<TEvent>`接口
 ```csharp
 
@@ -92,13 +91,14 @@ public class TestEventHandler : IEventHandler<TestEvent>
     }
 }
 ```
+#### Auto Register
 使用`AddEventHandlersFromAssembly`方法來自動註冊訂閱。
 ```csharp
  builder.Services.AddEventBus(o => o.UseSubscriptions(s =>
         s.AddEventHandlersFromAssembly()).UseInMemory());
 ```
 
-#### Use `SubscribeAsync` Method
+#### Use `Subscribe` Method
 ```csharp
 app.MapGet("/weatherforecast", async (IEventBus eventBus) =>
     {
