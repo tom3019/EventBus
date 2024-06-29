@@ -154,4 +154,22 @@ public class SubscriptionCollectionTest
         // Assert
         result.Should().BeFalse();
     }
+    
+    [Fact]
+    
+    public void CopyTo_CopyToSubscriptionDescriptorArray()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        var subscriptionDescriptor = new SubscriptionDescriptor(typeof(TestEvent), typeof(TestEventHandler));
+        subscriptionCollection.Add(subscriptionDescriptor);
+        
+        var array = new SubscriptionDescriptor[1];
+        
+        // Act
+        subscriptionCollection.CopyTo(array, 0);
+
+        // Assert
+        array[0].Should().BeEquivalentTo(subscriptionDescriptor);
+    }
 }
