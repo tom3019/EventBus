@@ -330,4 +330,33 @@ public class SubscriptionCollectionTest
         // Assert
         result.Should().Be(-1);
     }
+    
+    [Fact]
+    public void Insert_IfReadOnly_ThrowReadOnlyException()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        var subscriptionDescriptor = new SubscriptionDescriptor(typeof(TestEvent), typeof(TestEventHandler));
+        subscriptionCollection.MakeReadOnly();
+        
+        // Act
+        var action = () => subscriptionCollection.Insert(0, subscriptionDescriptor);
+
+        // Assert
+        action.Should().Throw<SubscriptionCollectionReadOnlyException>();
+    }
+    
+    [Fact]
+    public void Insert_IfNotContains_InsertSubscriptionDescriptor()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        var subscriptionDescriptor = new SubscriptionDescriptor(typeof(TestEvent), typeof(TestEventHandler));
+        
+        // Act
+        subscriptionCollection.Insert(0, subscriptionDescriptor);
+
+        // Assert
+        subscriptionCollection.Count.Should().Be(1);
+    }
 }
