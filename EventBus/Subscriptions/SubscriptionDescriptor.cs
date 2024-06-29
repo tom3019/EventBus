@@ -3,7 +3,7 @@
 /// <summary>
 /// Subscription Descriptor
 /// </summary>
-public class SubscriptionDescriptor
+public record SubscriptionDescriptor
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="SubscriptionDescriptor" /> class
