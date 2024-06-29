@@ -219,4 +219,32 @@ public class SubscriptionCollectionTest
         // Assert
         action.Should().Throw<SubscriptionCollectionReadOnlyException>();
     }
+    
+    [Fact]
+    public void Count_IfContains_ReturnCount()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        var subscriptionDescriptor = new SubscriptionDescriptor(typeof(TestEvent), typeof(TestEventHandler));
+        subscriptionCollection.Add(subscriptionDescriptor);
+        
+        // Act
+        var result = subscriptionCollection.Count;
+
+        // Assert
+        result.Should().Be(1);
+    }
+    
+    [Fact]
+    public void Count_IfNotContains_ReturnZero()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        
+        // Act
+        var result = subscriptionCollection.Count;
+
+        // Assert
+        result.Should().Be(0);
+    }
 }
