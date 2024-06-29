@@ -359,4 +359,36 @@ public class SubscriptionCollectionTest
         // Assert
         subscriptionCollection.Count.Should().Be(1);
     }
+    
+    [Fact]
+    public void RemoveAt_IfContains_RemoveSubscriptionDescriptor()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        var subscriptionDescriptor = new SubscriptionDescriptor(typeof(TestEvent), typeof(TestEventHandler));
+        subscriptionCollection.Add(subscriptionDescriptor);
+        
+        // Act
+        subscriptionCollection.RemoveAt(0);
+
+        // Assert
+        subscriptionCollection.Count.Should().Be(0);
+    }
+    
+    
+    [Fact]
+    public void RemoveAt_IfReadOnly_ThrowReadOnlyException()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        var subscriptionDescriptor = new SubscriptionDescriptor(typeof(TestEvent), typeof(TestEventHandler));
+        subscriptionCollection.Add(subscriptionDescriptor);
+        subscriptionCollection.MakeReadOnly();
+        
+        // Act
+        var action = () => subscriptionCollection.RemoveAt(0);
+
+        // Assert
+        action.Should().Throw<SubscriptionCollectionReadOnlyException>();
+    }
 }
