@@ -21,6 +21,23 @@ public class SubscriptionCollectionTest
         subscriptionCollection.First().Should().BeEquivalentTo(subscriptionDescriptor);
         subscriptionCollection.Count.Should().Be(1);
     }
+    
+    [Fact]
+    public void Add_InputSubscriptionDescriptor_IfContains_NotAdd()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        var subscriptionDescriptor1 = new SubscriptionDescriptor(typeof(TestEvent), typeof(TestEventHandler));
+        subscriptionCollection.Add(subscriptionDescriptor1);
+        
+        var subscriptionDescriptor2 = new SubscriptionDescriptor(typeof(TestEvent), typeof(TestEventHandler));
+
+        // Act
+        subscriptionCollection.Add(subscriptionDescriptor2);
+
+        // Assert
+        subscriptionCollection.Count.Should().Be(1);
+    }
 
     [Fact]
     public void Add_InputSubscriptionDescriptor_IfReadOnly_ThrowReadOnlyException()
@@ -50,6 +67,20 @@ public class SubscriptionCollectionTest
 
         // Assert
         subscriptionCollection.First().Should().BeEquivalentTo(expected);
+        subscriptionCollection.Count.Should().Be(1);
+    }
+    
+    [Fact]
+    public void AddGeneric_InputSubscriptionDescriptor_IfContains_NotAdd()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        subscriptionCollection.Add<TestEvent,TestEventHandler>();
+        
+        // Act
+        subscriptionCollection.Add<TestEvent,TestEventHandler>();
+
+        // Assert
         subscriptionCollection.Count.Should().Be(1);
     }
     
