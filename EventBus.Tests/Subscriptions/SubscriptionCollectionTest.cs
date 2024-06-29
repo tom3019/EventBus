@@ -40,7 +40,7 @@ public class SubscriptionCollectionTest
     }
 
     [Fact]
-    public void Add_InputSubscriptionDescriptor_IfReadOnly_ThrowReadOnlyException()
+    public void Add_InputSubscriptionDescriptor_IfReadOnly_ThrowSubscriptionCollectionReadOnlyException()
     {
         // Arrange
         var subscriptionCollection = new SubscriptionCollection();
@@ -85,7 +85,7 @@ public class SubscriptionCollectionTest
     }
     
     [Fact]
-    public void AddGeneric_InputSubscriptionDescriptor_IfReadOnly_ThrowReadOnlyException()
+    public void AddGeneric_InputSubscriptionDescriptor_IfReadOnly_ThrowSubscriptionCollectionReadOnlyException()
     {
         // Arrange
         var subscriptionCollection = new SubscriptionCollection();
@@ -99,7 +99,7 @@ public class SubscriptionCollectionTest
     }
     
     [Fact]
-    public void Clear_IfReadOnly_ThrowReadOnlyException()
+    public void Clear_IfReadOnly_ThrowSubscriptionCollectionReadOnlyException()
     {
         // Arrange
         var subscriptionCollection = new SubscriptionCollection();
@@ -205,7 +205,7 @@ public class SubscriptionCollectionTest
     }
     
     [Fact]
-    public void Remove_IfReadOnly_ThrowReadOnlyException()
+    public void Remove_IfReadOnly_ThrowSubscriptionCollectionReadOnlyException()
     {
         // Arrange
         var subscriptionCollection = new SubscriptionCollection();
@@ -332,7 +332,7 @@ public class SubscriptionCollectionTest
     }
     
     [Fact]
-    public void Insert_IfReadOnly_ThrowReadOnlyException()
+    public void Insert_IfReadOnly_ThrowSubscriptionCollectionReadOnlyException()
     {
         // Arrange
         var subscriptionCollection = new SubscriptionCollection();
@@ -377,7 +377,7 @@ public class SubscriptionCollectionTest
     
     
     [Fact]
-    public void RemoveAt_IfReadOnly_ThrowReadOnlyException()
+    public void RemoveAt_IfReadOnly_ThrowSubscriptionCollectionReadOnlyException()
     {
         // Arrange
         var subscriptionCollection = new SubscriptionCollection();
@@ -391,4 +391,67 @@ public class SubscriptionCollectionTest
         // Assert
         action.Should().Throw<SubscriptionCollectionReadOnlyException>();
     }
+    
+    [Fact]
+    public void This_IfContains_ReturnSubscriptionDescriptor()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        var subscriptionDescriptor = new SubscriptionDescriptor(typeof(TestEvent), typeof(TestEventHandler));
+        subscriptionCollection.Add(subscriptionDescriptor);
+        
+        // Act
+        var actual = subscriptionCollection[0];
+
+        // Assert
+        actual.Should().Be(subscriptionDescriptor);
+    }
+    
+    [Fact]
+    public void This_IfNotContains_ThrowArgumentOutOfRangeException()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        
+        // Act
+        var action = () => subscriptionCollection[0];
+
+        // Assert
+        action.Should().Throw<ArgumentOutOfRangeException>();
+    }
+    
+    [Fact]
+    public void This_IfReadOnly_ThrowSubscriptionCollectionReadOnlyException()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        var subscriptionDescriptor = new SubscriptionDescriptor(typeof(TestEvent), typeof(TestEventHandler));
+        subscriptionCollection.MakeReadOnly();
+        
+        // Act
+        var action = () => subscriptionCollection[0] = subscriptionDescriptor;
+
+        // Assert
+        action.Should().Throw<SubscriptionCollectionReadOnlyException>();
+    }
+    
+    [Fact]
+    public void This_ReplaceSubscription_ReturnNewSubscription()
+    {
+        // Arrange
+
+        
+        var subscriptionCollection = new SubscriptionCollection();
+        var subscriptionDescriptor1 = new SubscriptionDescriptor(typeof(object), typeof(object));
+        var subscriptionDescriptor2 = new SubscriptionDescriptor(typeof(TestEvent), typeof(TestEventHandler));
+        subscriptionCollection.Add(subscriptionDescriptor1);
+        
+        // Act
+         subscriptionCollection[0] = subscriptionDescriptor2;
+
+        // Assert
+        subscriptionCollection.First().Should().BeEquivalentTo(subscriptionDescriptor2);
+        subscriptionCollection.Count.Should().Be(1);
+    }
+    
 }
