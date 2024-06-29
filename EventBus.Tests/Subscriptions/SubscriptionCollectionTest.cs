@@ -247,4 +247,35 @@ public class SubscriptionCollectionTest
         // Assert
         result.Should().Be(0);
     }
+    
+    [Fact]
+    public void GetEnumerator_IfContains_ReturnSubscriptionDescriptor()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        var subscriptionDescriptor = new SubscriptionDescriptor(typeof(TestEvent), typeof(TestEventHandler));
+        subscriptionCollection.Add(subscriptionDescriptor);
+        
+        // Act
+        using var enumerator = subscriptionCollection.GetEnumerator();
+        enumerator.MoveNext();
+        var actual = enumerator.Current;
+
+        // Assert
+        actual.Should().Be(subscriptionDescriptor);
+    }
+    
+    [Fact]
+    public void GetEnumerator_IfNotContains_ReturnSubscriptionDescriptor()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        
+        // Act
+        using var enumerator = subscriptionCollection.GetEnumerator();
+        var actual = enumerator.Current;
+
+        // Assert
+        actual.Should().BeNull();
+    }
 }
