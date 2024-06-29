@@ -125,4 +125,33 @@ public class SubscriptionCollectionTest
         // Assert
         subscriptionCollection.Count.Should().Be(0);
     }
+    
+    [Fact]
+    public void Contains_IfContains_ReturnTrue()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        var subscriptionDescriptor = new SubscriptionDescriptor(typeof(TestEvent), typeof(TestEventHandler));
+        subscriptionCollection.Add(subscriptionDescriptor);
+        
+        // Act
+        var result = subscriptionCollection.Contains(subscriptionDescriptor);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+    
+    [Fact]
+    public void Contains_IfNotContains_ReturnFalse()
+    {
+        // Arrange
+        var subscriptionCollection = new SubscriptionCollection();
+        var subscriptionDescriptor = new SubscriptionDescriptor(typeof(TestEvent), typeof(TestEventHandler));
+        
+        // Act
+        var result = subscriptionCollection.Contains(subscriptionDescriptor);
+
+        // Assert
+        result.Should().BeFalse();
+    }
 }
