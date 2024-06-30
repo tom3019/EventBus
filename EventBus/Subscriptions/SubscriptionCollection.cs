@@ -34,7 +34,9 @@ internal class SubscriptionCollection : ISubscriptionCollection
     public void Add<TEvent, TEventHandler>() where TEvent : class where TEventHandler : IEventHandler<TEvent>
     {
         CheckReadOnly();
-        _descriptors.Add(new SubscriptionDescriptor(typeof(TEvent), typeof(TEventHandler)));
+        
+        var subscriptionDescriptor = new SubscriptionDescriptor(typeof(TEvent), typeof(TEventHandler));
+        Add(subscriptionDescriptor);
     }
 
     /// <summary>

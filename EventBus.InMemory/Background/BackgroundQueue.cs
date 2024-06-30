@@ -30,4 +30,9 @@ public class BackgroundQueue<T> : IBackgroundQueue<T> where T : class
     {
         return _workItems.Reader.ReadAsync(cancellationToken);
     }
+    
+    public int GetQueueCount()
+    {
+        return _workItems.Reader.Count;
+    }
 }
