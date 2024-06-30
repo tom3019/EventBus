@@ -1,4 +1,6 @@
-﻿namespace EventBus.InMemory.Background;
+﻿using System.Runtime.CompilerServices;
+
+namespace EventBus.InMemory.Background;
 
 internal class InternalEvent
 {

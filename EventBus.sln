@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{1BFD9B0A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBus.Tests", "EventBus.Tests\EventBus.Tests.csproj", "{EBE73A4A-2204-44CA-98EE-C1B0AC3A3FDE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBus.InMemory.Tests", "EventBus.InMemory.Tests\EventBus.InMemory.Tests.csproj", "{A3590254-F8D1-46AC-B545-71C4ACBBE276}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,8 +40,13 @@ Global
 		{EBE73A4A-2204-44CA-98EE-C1B0AC3A3FDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBE73A4A-2204-44CA-98EE-C1B0AC3A3FDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBE73A4A-2204-44CA-98EE-C1B0AC3A3FDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3590254-F8D1-46AC-B545-71C4ACBBE276}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3590254-F8D1-46AC-B545-71C4ACBBE276}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3590254-F8D1-46AC-B545-71C4ACBBE276}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3590254-F8D1-46AC-B545-71C4ACBBE276}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{EBE73A4A-2204-44CA-98EE-C1B0AC3A3FDE} = {1BFD9B0A-090E-4720-9414-D03F11F74949}
+		{A3590254-F8D1-46AC-B545-71C4ACBBE276} = {1BFD9B0A-090E-4720-9414-D03F11F74949}
 	EndGlobalSection
 EndGlobal
